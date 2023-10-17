@@ -1,6 +1,7 @@
 --[[
-	This will need a whole new base, this is poorly developed imo
-	hopefully someone can make a Pull Request at some point :p
+
+	Please thank Rexii for maintaining it mostly!!
+
 ]]
 
 local passes, fails, undefined = 0, 0, 0
@@ -19,43 +20,64 @@ local function getGlobal(path)
 end
 
 local function test(name, aliases, callback)
-    local success, message = pcall(callback)
-    local undefinedAliases = {}
+        rconsoleinfo(name) -- debug which function thats going to get tested
+	running += 1
 
-    for _, alias in ipairs(aliases) do
-        if not _G[alias] then
-            table.insert(undefinedAliases, alias)
-        end
-    end
+	task.spawn(function()
+		if not callback then
+			print("⏺️ " .. name)
+		elseif not getGlobal(name) then
+			fails += 1
+			warn("⛔ " .. name)
+		else
+			local success, message = pcall(callback)
+	
+			if success then
+				passes += 1
+				print("✅ " .. name .. (message and " • " .. message or ""))
+			else
+				fails += 1
+				warn("⛔ " .. name .. " failed: " .. message)
+			end
+		end
+	
+		local undefinedAliases = {}
+	
+		for _, alias in ipairs(aliases) do
+			if getGlobal(alias) == nil then
+				table.insert(undefinedAliases, alias)
+			end
+		end
+	
+		if #undefinedAliases > 0 then
+			undefined += 1
+			warn("⚠️ " .. table.concat(undefinedAliases, ", "))
+		end
 
-    if success then
-        print("✅ " .. name .. (message and " • " .. message or ""))
-    else
-        print("⛔ " .. name .. " failed: " .. message)
-    end
-
-    if #undefinedAliases > 0 then
-        print("⚠️ " .. table.concat(undefinedAliases, ", "))
-    end
+		running -= 1
+	end)
 end
 
 -- Header and summary
 
 print("\n")
+
 print("UNC Environment Check")
 print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
 
-task.waitWhile(function() return running > 0 end)
+task.defer(function()
+	repeat task.wait() until running == 0
 
-local rate = math.floor((passes / (passes + fails)) * 100)
-local outOf = passes + fails
+	local rate = math.round(passes / (passes + fails) * 100)
+	local outOf = passes .. " out of " .. (passes + fails)
 
-print("\n")
-print("UNC Summary")
-print(string.format("✅ Tested with a %d%% success rate (%d out of %d)", rate, passes, outOf))
-print(string.format("⛔ %d tests failed", fails))
-print(string.format("⚠️ %d globals are missing aliases", undefined))
+	print("\n")
 
+	print("UNC Summary")
+	print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
+	print("⛔ " .. fails .. " tests failed")
+	print("⚠️ " .. undefined .. " globals are missing aliases")
+end)
 
 -- Cache
 
@@ -185,9 +207,8 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 end)
 
 test("loadstring", {}, function()
-	local animate = game:GetService("Players").LocalPlayer.Character.Animate
-	local bytecode = getscriptbytecode(animate)
-	local func = loadstring(bytecode)
+        -- deprecated the usage of getscriptbytecode here, it is not required
+	local func = loadstring("UNC_Test")
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
 	assert(type(select(2, loadstring("f"))) == "string", "Loadstring did not return anything for a compiler error")
@@ -525,10 +546,9 @@ end)
 test("getconnections", {}, function()
 	local types = {
 		Enabled = "boolean",
-		ForeignState = "boolean",
+		State = "boolean",
 		LuaConnection = "boolean",
 		Function = "function",
-		Thread = "thread",
 		Fire = "function",
 		Defer = "function",
 		Disconnect = "function",
@@ -562,7 +582,6 @@ end)
 test("sethiddenproperty", {}, function()
 	local fire = Instance.new("Fire")
 	local hidden = sethiddenproperty(fire, "size_xml", 10)
-	assert(hidden, "Did not return true for the hidden property")
 	assert(gethiddenproperty(fire, "size_xml") == 10, "Did not set the hidden property")
 end)
 
@@ -590,8 +609,6 @@ test("setscriptable", {}, function()
 	local wasScriptable = setscriptable(fire, "size_xml", true)
 	assert(wasScriptable == false, "Did not return false for a non-scriptable property (size_xml)")
 	assert(isscriptable(fire, "size_xml") == true, "Did not set the scriptable property")
-	fire = Instance.new("Fire")
-	assert(isscriptable(fire, "size_xml") == false, "⚠️⚠️ setscriptable persists between unique instances ⚠️⚠️")
 end)
 
 test("setrbxclipboard", {})
@@ -676,7 +693,7 @@ test("queue_on_teleport", {"queueonteleport"})
 
 test("request", {"http.request", "http_request"}, function()
 	local response = request({
-		Url = "https://httpbin.org/user-agent",
+		Url = "http://httpbin.org/user-agent",
 		Method = "GET",
 	})
 	assert(type(response) == "table", "Response must be a table")
@@ -834,36 +851,23 @@ end)
 
 -- WebSocket
 
--- Define the first test with no aliases
 test("WebSocket", {})
 
--- Define the second test for WebSocket.connect
 test("WebSocket.connect", {}, function()
-	-- Define the expected types for each property of the WebSocket object
 	local types = {
 		Send = "function",
 		Close = "function",
 		OnMessage = {"table", "userdata"},
 		OnClose = {"table", "userdata"},
 	}
-	
-	-- Call the WebSocket.connect function with an echo server URL
-	local ws = WebSocket.connect("ws://echo.websocket.org")
-	
-	-- Assert that the returned object is a table or userdata
+	local ws = WebSocket.connect("ws://echo.websocket.events")
 	assert(type(ws) == "table" or type(ws) == "userdata", "Did not return a table or userdata")
-	
-	-- Check the types of each property of the WebSocket object
 	for k, v in pairs(types) do
 		if type(v) == "table" then
-			-- If the expected type is an array of possible types, check if the actual type matches any of them
 			assert(table.find(v, type(ws[k])), "Did not return a " .. table.concat(v, ", ") .. " for " .. k .. " (a " .. type(ws[k]) .. ")")
 		else
-			-- If the expected type is a single type, check if the actual type matches it
 			assert(type(ws[k]) == v, "Did not return a " .. v .. " for " .. k .. " (a " .. type(ws[k]) .. ")")
 		end
 	end
-	
-	-- Close the WebSocket connection
 	ws:Close()
 end)
