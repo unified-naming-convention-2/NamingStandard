@@ -18,6 +18,19 @@ Returns the name and version of the current executor.
 
 ---
 
+## gethwid
+
+```lua
+function gethwid(): (string, string)
+```
+
+Returns the name and version of the current executor.
+
+### Aliases
+
+ * `gethardwareid`
+
+---
 ## lz4compress
 
 ```lua
