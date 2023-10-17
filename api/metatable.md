@@ -103,28 +103,6 @@ end)
 
 ---
 
-## isreadonly
-
-```lua
-function isreadonly(object: table): boolean
-```
-
-Returns whether `object` is frozen or read-only. Identical to `table.isfrozen`.
-
-### Parameters
-
- * `object` - A table or userdata.
-
-### Example
-
-```lua
-local object = {}
-table.freeze(object)
-print(isreadonly(object)) --> true
-```
-
----
-
 ## setrawmetatable
 
 ```lua
@@ -149,27 +127,72 @@ print(getmetatable(object)) --> Hello, world!
 
 ---
 
-## setreadonly
+## table.isfrozen
 
 ```lua
-function setreadonly(object: table, readonly: boolean): ()
+function table.isfrozen(object: table): bool
 ```
 
-Sets whether `object` is frozen or read-only.
+Check the table if it's frozen.
 
 ### Parameters
 
  * `object` - A table or userdata.
- * `readonly` - Whether or not `object` should be frozen.
 
 ### Example
 
 ```lua
-local object = {}
+local a1 = {
+	"abc",
+	"dfg",
+	"hij"
+}
 
-table.freeze(object)
-print(isreadonly(object)) --> true
+table.freeze(a1)
+local FrozenTable = table.isfrozen
 
-setreadonly(object, false)
-print(isreadonly(object)) --> false
+if (FrozenTable) then
+	print("a1 is frozen...")
+end
+
+```
+
+---
+
+## table.freeze
+
+```lua
+function table.freeze(object: table): ()
+```
+
+Freeze's a table
+
+### Parameters
+
+ * `object` - A table or userdata.
+
+### Example
+
+```lua
+-- TODO - rushed this lol
+```
+
+---
+
+## table.unfreeze
+
+```lua
+function table.unfreeze(object: table): ()
+```
+
+Unfreeze's a table
+
+### Parameters
+
+ * `object` - A table or userdata.
+
+### Example
+
+```lua
+-- TODO - rushed this lol
 ```
