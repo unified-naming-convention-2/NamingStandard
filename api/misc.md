@@ -24,7 +24,7 @@ Returns the name and version of the current executor.
 function gethwid(): (string, string)
 ```
 
-Returns the name and version of the current executor.
+Returns the HardwareID in a Encrypted Format (e.g. SHA256 or SHA512)
 
 ### Aliases
 
