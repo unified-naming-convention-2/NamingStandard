@@ -186,9 +186,11 @@ The executor provides the following headers for identification on a web server:
 
 | Header | Description |
 | ------ | ----------- |
-| `PREFIX-User-Identifier` | A string unique to each user, and does not change if the script executor is used across computers. |
-| `PREFIX-Fingerprint` | The hardware identifier of the user. |
+| `PREFIX-User-Identifier` or `User-Identifier` | A string unique to each user, and does not change if the script executor is used across computers. |
+| `PREFIX-Fingerprint` or `Fingerprint` | The hardware identifier of the user. |
 | `User-Agent` | The name and version of the executor. |
+
+ * Please prefer `User-Identifier` and `Fingerprint` in the future, thank you!
 
 ### Parameters
 
