@@ -1,6 +1,6 @@
 --[[
 
-	Please thank Rexii for maintaining it mostly!!
+	Please thank Rexii for maintaining it mostly!! (now it's my turn fuckers -Kai)
 
 ]]
 
