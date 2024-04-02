@@ -1,8 +1,7 @@
 # ReUNC
-Welcome to ReUNC, an organization between executor developers to provide a unified scripting API for our scripters.
+Welcome to UNC2, an organization between executor developers to provide a unified scripting API for our scripters.
 
-~~**Please go to our official website for better styled information: https://scriptunc.org/**~~
-Scriptunc.org is a completely useless website as it's now unregistered, sadly I'm unable to afford a proper domain.
+**Please go to our official website for better styled information: https://scriptunc2.org/** (not yet availible)
 
 ## Why?
 Over the years scripting has gotten more and more complex to support multiple executors. This is because of the many unique naming conventions various executors use.
